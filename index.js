@@ -2,12 +2,11 @@ const PORT = 8080;
 const app = require('express')();
 const xl = require('excel4node');
 const fetch = require('node-fetch');
+const fs = require('fs');
 
-//const url = "https://jsonplaceholder.typicode.com/posts";
 
 
-//const fetch = require('node-fetch');
-var data;
+var data; //storing data object after fetching url
 fetch('https://jsonplaceholder.typicode.com/posts')
     .then(function(response) {
         return response.json();
@@ -17,25 +16,8 @@ fetch('https://jsonplaceholder.typicode.com/posts')
         //console.log(JSON.stringify(myJson));
     });
 
-var obj = [{
-    id : "1",
-    title: "covid-3 wave",
-    author: "experts",
-    publishDate : Date.now + "rohit",
-    description : "Experts says herd immunity is working on some exstinct",
-   
-    
-},
-{
-    id : "2",
-    title : "job opportunity in IT field",
-    author : "john",
-    publishDate : Date.now,
-    description: "Due to corona mahamari IT field jobs increases by 70 percent",
-    
-}
-];
 
+// this is heading of each columns 
 const columnNames = [
         "UserID",
         "ID",
@@ -43,10 +25,13 @@ const columnNames = [
         "Body"
     ]
 
+// funtion which is resposible for return json format...
 
 app.get('/', (req, res)=>{
     res.json(data);
 });
+
+// function is resposible for download excel file of format....
 
 app.get('/download', (req, res)=>{
     const wb = new xl.Workbook();
@@ -58,8 +43,8 @@ app.get('/download', (req, res)=>{
      });
 
     
-     let rowIndex = 2;
-data.forEach( record => {
+    let rowIndex = 2;
+    data.forEach( record => {
     let columnIndex = 1;
     Object.keys(record ).forEach(columnName =>{
         ws.cell(rowIndex,columnIndex++)
@@ -78,6 +63,23 @@ wb.write('ExcelFile.xlsx', function(err, stats) {
      wb.write('ExcelFile.xlsx', res);
 });
 
-app.get('')
-     
+// this is responsible for converting json file into csv file
+app.get('/csv', (req, res)=>{
+   let str ="";
+    columnNames.forEach(columns =>{
+        str = str + columns + ",";
+    });
+    str = str + "\n";
+    data.forEach(record=>{
+        Object.keys(record).forEach(value=>{
+            str = str + record[value] +",";
+        });
+        str = str + "\n";
+    });
+
+  res.attachment('filename.csv');
+  res.type('csv');
+  res.send(str);
+    // res.send(str);
+});    
 app.listen(PORT);
