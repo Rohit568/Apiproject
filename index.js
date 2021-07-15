@@ -67,14 +67,18 @@ wb.write('ExcelFile.xlsx', function(err, stats) {
 app.get('/csv', (req, res)=>{
    let str ="";
     columnNames.forEach(columns =>{
-        str = str + columns + ",";
+        str = str + columns + ',';
     });
-    str = str + "\n";
+    str = str + '\n';
+   
     data.forEach(record=>{
+        
         Object.keys(record).forEach(value=>{
-            str = str + record[value] +",";
+            let curStr = record[value].toString();
+            curStr = curStr.replace(/\n/g, " ");
+            str = str + curStr+",";
         });
-        str = str + "\n";
+        str = str + '\n';
     });
 
   res.attachment('filename.csv');
